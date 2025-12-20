@@ -44,12 +44,12 @@ def login(
     user = db.query(User).filter(User.username == credentials.username).first()
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found."
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Not Authorized."
         )
 
     if not verify_password(credentials.password, user.password):
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Password."
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Not Authorized."
         )
 
     return {"token": create_token(user.user_id)}

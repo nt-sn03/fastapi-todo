@@ -22,3 +22,15 @@ class UserResponse(BaseModel):
     username: Annotated[str, Field(min_length=5, max_length=64)]
     password: Annotated[str, Field(min_length=8, max_length=128)]
     role: Role
+
+
+class ProfileResult(BaseModel):
+    tasks_count: int
+    tasks_todo: int
+    tasks_doing: int
+    tasks_done: int
+
+
+class UserProfile(BaseModel):
+    user: UserResponse
+    result: ProfileResult

@@ -22,6 +22,12 @@ class Priority(int, Enum):
     PRIORITY05 = 5
 
 
+class TaskStatus(int, Enum):
+    TODO = 1
+    DOING = 2
+    DONE = 3
+
+
 class Category(Base):
     __tablename__ = "categories"
 
@@ -52,6 +58,7 @@ class Task(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
     description = Column(String(length=255), nullable=True)
     due_date = Column(DateTime, nullable=False)
+    status = Column(SQLEnum(TaskStatus), default=TaskStatus.TODO, nullable=False)
     priority = Column(SQLEnum(Priority), default=Priority.PRIORITY05, nullable=False)
 
     created_at = Column(DateTime, default=datetime.now)

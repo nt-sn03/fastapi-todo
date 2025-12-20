@@ -29,7 +29,15 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
-    tasks = relationship("Task", back_populates="user")
+    tasks = relationship("Task", lazy="dynamic")
 
     def __str__(self):
         return self.username
+
+    @property
+    def is_user(self) -> bool:
+        return self.role == Role.USER
+
+    @property
+    def is_admin(self) -> bool:
+        return self.role == Role.ADMIN
