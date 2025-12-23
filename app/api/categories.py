@@ -1,20 +1,18 @@
-from typing import Annotated
+from typing import Annotated, List
 from uuid import uuid1
 import shutil
 
 from fastapi import Form, Depends, HTTPException, status, File, UploadFile
 from fastapi.routing import APIRouter
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 
 from ..core.dependencies import get_db
-from ..core.security import verify_token
 from ..models.user import User
 from ..models.task import Category
 from ..schemas.categories import CategoryResponse
+from .deps import get_admin, get_user, get_current_user
 
 router = APIRouter(prefix="/categories", tags=["categories"])
-security = HTTPBearer()
 
 
 @router.post("/", response_model=CategoryResponse)
@@ -23,25 +21,8 @@ def create_categories(
     color: Annotated[str, Form()],
     icon: Annotated[UploadFile, File()],
     db: Annotated[Session, Depends(get_db)],
-    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    admin: Annotated[User, Depends(get_admin)],
 ):
-    decoded_token = verify_token(credentials.credentials)
-    if decoded_token is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token."
-        )
-
-    user: User = db.query(User).get(decoded_token["user_id"])
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token."
-        )
-
-    if not user.is_admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Permission denied."
-        )
-
     existing_category = db.query(Category).filter(Category.name == name).first()
     if existing_category:
         raise HTTPException(
@@ -71,9 +52,13 @@ def create_categories(
     return new_category
 
 
-@router.get("/")
-def get_category_list():
-    pass
+@router.get("/", response_model=List[CategoryResponse])
+def get_category_list(
+    user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    categories = db.query(Category).all()
+    return categories
 
 
 @router.get("/{pk}")
