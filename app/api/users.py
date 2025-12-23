@@ -11,7 +11,7 @@ from ..models.user import User
 from ..models.task import Task, TaskStatus
 from ..schemas.user import UserProfile
 
-router = APIRouter(prefix="/users")
+router = APIRouter(prefix="/users", tags=["users"])
 
 security = HTTPBearer()
 
